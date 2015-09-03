@@ -3,7 +3,8 @@ import os
 import numpy
 import pickle
 import operator
-
+import urllib
+import zipfile
 
 # ALL FILES IN THE SAME DIRECTORY AS SCRIPT
 ind_path = 'itcont.txt'
@@ -16,6 +17,14 @@ ind_name = 'ind_dict.pckl'
 employ_name = 'employ_dict.pckl'
 reduced_name = 'reduced_dict.pckl'
 summ_name = 'summ_dict.pckl'
+
+    
+# GLOBALS
+comm_dict = {}
+cand_dict = {}
+employ_dict = {}
+reduced_dict = {}
+
 
 
 # PICKLE WRAPPERS
@@ -30,11 +39,52 @@ def load(name):
     f.close()
     return var
 
-# GLOBALS
-comm_dict = {}
-cand_dict = {}
-employ_dict = {}
-reduced_dict = {}
+
+def checkFiles():
+    try:
+        f = open(cm_path,'rb')
+        f.close()
+    except:
+        print('{c} not found, downloading local version...'.format(c=cm_path))
+        download('cm')
+
+    try:
+        f = open(cn_path,'rb')
+        f.close()
+    except:
+        print('{c} not found, downloading local version...'.format(c=cn_path))
+        download('cn')
+        
+    try:
+        f = open(ind_path,'rb')
+        f.close()
+    except:
+        print('{i} not found, downloading local version...'.format(i=ind_path))
+        download('ind')
+
+
+
+def download(dict_id):
+    
+    if dict_id == 'cm':
+        url = 'ftp://ftp.fec.gov/FEC/2014/cm14.zip'
+        path = 'cm.zip'
+        extract = cm_path
+        
+    elif dict_id == 'cn':
+        url = 'ftp://ftp.fec.gov/FEC/2014/cn14.zip'
+        path = 'cn.zip'
+        extract = cn_path
+        
+    elif dict_id == 'ind':
+        url = 'ftp://ftp.fec.gov/FEC/2014/indiv14.zip'
+        path = 'ind.zip'
+        extract = ind_path
+        
+    urllib.urlretrieve(url,path)
+    with zipfile.ZipFile(path) as zf:
+        zf.extractall()
+
 
 #####################################################
 def createDict(filename,key_ind,val_ind):
@@ -150,36 +200,39 @@ def getParty(key):
 ##########################################
 
 
-comm_dict = getDict(cm_name,'cm')
-cand_dict = getDict(cn_name,'cn')
-employ_dict = getDict(employ_name,'employ')
-reduced_dict = getDict(reduced_name,'reduced')
+if __name__ == '__main__':
+    checkFiles()
 
-# SANITY CHECKING -- ENSURE GLOBALS ASSIGNED CORRECTLY
-print('Size of commDict:',len(comm_dict.keys()))
-print('Size of candDict:',len(cand_dict.keys()))
-print('Size of employDict:',len(employ_dict.keys()))
-print('Size of reducedDict:',len(reduced_dict.keys()))
-      
-summ_dict = getDict(summ_name,'summ')
+    comm_dict = getDict(cm_name,'cm')
+    cand_dict = getDict(cn_name,'cn')
+    employ_dict = getDict(employ_name,'employ')
+    reduced_dict = getDict(reduced_name,'reduced')
+
+    # SANITY CHECKING -- ENSURE GLOBALS ASSIGNED CORRECTLY
+    print('Size of commDict:',len(comm_dict.keys()))
+    print('Size of candDict:',len(cand_dict.keys()))
+    print('Size of employDict:',len(employ_dict.keys()))
+    print('Size of reducedDict:',len(reduced_dict.keys()))
+          
+    summ_dict = getDict(summ_name,'summ')
 
 
-# Not sure why we're seeing negative entries, but this is definitely an issue
-# with the data, not the processing
-sorted_summ = sorted(summ_dict.items(),key=operator.itemgetter(1))
-n = len(sorted_summ)
-for e in sorted_summ[n-100:]:
-    print('{k}: ${c}.00'.format(k=e[0],c=e[1]))
+    # Not sure why we're seeing negative entries, but this is definitely an issue
+    # with the data, not the processing
+    sorted_summ = sorted(summ_dict.items(),key=operator.itemgetter(1))
+    n = len(sorted_summ)
+    for e in sorted_summ[n-100:]:
+        print('{k}: ${c}.00'.format(k=e[0],c=e[1]))
 
-print('Saving to file....')
-f = open('employerMoney.txt','wb')
-for i in range(n-200,n):
-    key = sorted_summ[i][0].replace("'","")
-    totals = reduced_dict[key]
-    rep = str(totals['REP'])
-    dem = str(totals['DEM'])
-    oth = str(totals['Other'])
-    tot = str(sorted_summ[i][1])
-    f.write("'{k}',{r},{d},{o},{t}\n".format(k=key,r=rep,d=dem,o=oth,t=tot))
-f.close()
-print('....complete')
+    print('Saving to file....')
+    f = open('employerMoney.txt','wb')
+    for i in range(n-200,n):
+        key = sorted_summ[i][0].replace("'","")
+        totals = reduced_dict[key]
+        rep = str(totals['REP'])
+        dem = str(totals['DEM'])
+        oth = str(totals['Other'])
+        tot = str(sorted_summ[i][1])
+        f.write("'{k}',{r},{d},{o},{t}\n".format(k=key,r=rep,d=dem,o=oth,t=tot))
+    f.close()
+    print('....complete')
