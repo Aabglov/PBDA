@@ -62,28 +62,28 @@ def powerData(filename,n,q=4,debug=False):
         A = np.matrix(np.zeros((q,q)))
         w = np.ones((q,1))
         with open(filename) as f:
-            block = list(islice(f,n))
-            if not block:
-                #break
-                pass
-            else:
-                total = len(block)
-                count = 0
-                for l in block:
-                    count += 1
-                    data = l.split(';')
-                    try:
-                        # Get data values from block
-                        w[1] = float(data[6])
-                        w[2] = float(data[7])
-                        w[3] = float(data[8])
-                        A += w*w.T
-                    except ValueError as v:
-                        #if debug:
-                        #    print("computePowerData:: non-fatal error :: {v}".format(v=v))
-                        pass
-                    if not count%100000 and debug:
-                        print('{c} of {l} processed'.format(c=count,l=total))
+            while True:
+                block = list(islice(f,n))
+                if not block:
+                    break
+                else:
+                    total = len(block)
+                    count = 0
+                    for l in block:
+                        count += 1
+                        data = l.split(';')
+                        try:
+                            # Get data values from block
+                            w[1] = float(data[6])
+                            w[2] = float(data[7])
+                            w[3] = float(data[8])
+                            A += w*w.T
+                        except ValueError as v:
+                            #if debug:
+                            #    print("computePowerData:: non-fatal error :: {v}".format(v=v))
+                            pass
+                        if not count%100000 and debug:
+                            print('{c} of {l} processed'.format(c=count,l=total))
         save(A,'A.pckl')
     return A
 
