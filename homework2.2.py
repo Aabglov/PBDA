@@ -13,6 +13,6 @@ def sortSecondDescend(L):
 
 if __name__ == '__main__':
     L = [(1,2,3),(4,1,5),(0,0,6)]
-    print sortFirst(L)
-    print sortThird(L)
-    print sortSecondDescend(L)
+    print(sortFirst(L))
+    print(sortThird(L))
+    print(sortSecondDescend(L))

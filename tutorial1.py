@@ -3,7 +3,7 @@ import os
 import numpy
 import pickle
 import operator
-import urllib
+import urllib.request
 import zipfile
 
 # ALL FILES IN THE SAME DIRECTORY AS SCRIPT
@@ -81,7 +81,7 @@ def download(dict_id):
         path = 'ind.zip'
         extract = ind_path
         
-    urllib.urlretrieve(url,path)
+    urllib.request.urlretrieve(url,path)
     with zipfile.ZipFile(path) as zf:
         zf.extractall()
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
         print('{k}: ${c}.00'.format(k=e[0],c=e[1]))
 
     print('Saving to file....')
-    f = open('employerMoney.txt','wb')
+    f = open('employerMoney.txt','w')
     for i in range(n-200,n):
         key = sorted_summ[i][0].replace("'","")
         totals = reduced_dict[key]

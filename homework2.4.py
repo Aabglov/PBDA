@@ -3,7 +3,7 @@ import os
 import numpy
 import pickle
 import operator
-import urllib
+import urllib.request
 import zipfile
 
 # ALL FILES IN THE SAME DIRECTORY AS SCRIPT
@@ -67,7 +67,7 @@ def download(dict_id):
         extract = oth_path
         
         
-    urllib.urlretrieve(url,path)
+    urllib.request.urlretrieve(url,path)
     with zipfile.ZipFile(path) as zf:
         zf.extractall()
 
@@ -107,7 +107,7 @@ def createOthDict(filename):
 
 def getTopTen(pac,oth_dict):
     d = oth_dict[pac]
-    return dict(sorted(d.iteritems(),key=operator.itemgetter(1),reverse=True)[:10])
+    return dict(sorted(d.items(),key=operator.itemgetter(1),reverse=True)[:10])
         
 
 def getDict(filename,dict_id):
@@ -149,6 +149,6 @@ if __name__ == '__main__':
     pac = 'KOCH INDUSTRIES INC POLITICAL ACTION COMMITTEE (KOCHPAC)'
     print('Top donations made by {p}'.format(p=pac))
     pac_cont = getTopTen(pac,oth_dict)
-    for k,v in pac_cont.iteritems():
+    for k,v in pac_cont.items():
         print('{k}: ${v}'.format(k=k,v=v))
     
