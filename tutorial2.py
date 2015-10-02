@@ -5,6 +5,7 @@ import pickle
 import operator
 import urllib
 import zipfile
+import copy
 
 # ALL FILES IN THE SAME DIRECTORY AS SCRIPT
 cm_path = 'cm.txt'
@@ -100,11 +101,12 @@ def createOthDict(filename):
 
 
 def reduceOthDict(oth_dict):
+    red_dict = copy.copy(oth_dict)
     oth_keys = oth_dict.keys()
     for k in oth_keys:
         if len(oth_dict[k]) < 601:
-            oth_dict.pop(k,None)
-    return oth_dict
+            red_dict.pop(k,None)
+    return red_dict
 
 
 def getDict(filename,dict_id):
@@ -174,7 +176,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         for c in cont_list:
-            print len(oth_dict[c])
+            print(len(oth_dict[c]))
 
     n = len(oth_dict)
     pairs = [(cont_list[i],cont_list[j]) for i in range(n-1) for j in range(i+1,n,1)]
