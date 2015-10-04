@@ -1,13 +1,22 @@
 library('DAAG')
 head(ais)
-str(ais)
-
-plot(ais$pcBfat,ais$ssf)
-
+plot(ais$ssf,ais$pcBfat)
 males = which(ais$sex=='m')
-points(ais$pcBfat[males],ais$ssf[males],col='blue',pch=16)
-points(ais$pcBfat[-males],ais$ssf[-males],col='red',pch=16)
+points(ais$ssf[males],ais$pcBfat[males],col='blue',pch=16)
+points(ais$ssf[-males],ais$pcBfat[-males],col='red',pch=16)
 
 #lm.obj = lm(pcBfat[males]~ssf[males],data=ais)
 #abline(lm.obj,col='red')
-abline(lm(ais$ssf~ais$pcBfat))
+lm_male <- lm(ais$pcBfat[males]~ais$ssf[males])
+lm_female <- lm(ais$pcBfat[-males]~ais$ssf[-males])
+abline(lm_male,col='blue')
+abline(lm_female,col='red')
+
+print("1(b):")
+print("By visual inspection the slopes do appear to be approximately equal for the two fitted models")
+
+print(confint(lm_male))
+print(confint(lm_female))
+print("CONFINT MALE: 0.3837785 1.3147135")
+print("CONFINT FEMALE: 3.5279512 5.0034215")
+print("The confidence intervals of the intercepts for the two models do not overlap.  This implies that males have lower percent body fat than females with the same skin thickness.")
