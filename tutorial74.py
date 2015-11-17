@@ -185,3 +185,92 @@ for pair in wordDict:
         confusionMatrix[i,j] += 1
 
 print('acc =',sum(np.diag(confusionMatrix))/sum(sum(confusionMatrix)))
+
+###################### HOMEWORK 7.6 # 1 #################################
+
+
+
+# Used Words Dict
+usedWordsDict = {}
+for pair in wordDict:
+    D = wordDict[pair]
+    author = pair[1]
+    for word in D.keys():
+        value = usedWordsDict.get(word)
+        if value is None:
+            value = [author]
+        else:
+            if author not in value:
+                value.append(pair[1])
+        usedWordsDict[word] = value
+print("used words",len(usedWordsDict))
+
+# create test word list
+testWords = []
+for key,val in iter(usedWordsDict.items()):
+    if 'HAMILTON ' in val and 'JAY ' in val and 'MADISON ' in val and 'H and M ' in val:
+        testWords.append(key)
+print("test words",len(testWords))
+
+
+# Remove non-test words from wordDict
+for pair in wordDict:
+    D = wordDict[pair]
+    newDict = {}
+    for word in D:
+        if word in testWords:
+            newDict[word] = D[word]
+    wordDict[pair] = newDict
+
+nR = 0.
+authors = ['HAMILTON ', 'JAY ', 'MADISON ', 'H and M ']
+nGroups = len(authors)
+logPriors = dict.fromkeys(authors,0)
+freqDistnDict = dict.fromkeys(authors)
+for pair in wordDict:
+    author = pair[1]
+    D = wordDict[pair]
+    distn = freqDistnDict.get(author)
+    if distn is None:
+        distn = D
+    else:
+        for word in D:
+            if word in distn.keys():
+                distn[word] += D[word]
+            else:
+                distn[word] = D[word]
+    freqDistnDict[author] = distn
+    logPriors[author] += 1.
+    nR += 1.
+        
+logProbDict = dict.fromkeys(authors,{})
+distnDict = dict.fromkeys(authors)
+for author in authors:
+    authorDict = {}
+    nWords= 0.
+    for word in testWords:
+        nWords += freqDistnDict[author][word]
+    for word in testWords:
+        relFreq = freqDistnDict[author][word]/nWords
+        authorDict[word] = np.log(relFreq)
+    logProbDict[author] = authorDict
+    logPriors[author] = np.log(logPriors[author]/nR)
+    distnDict[author] = [logPriors[author], logProbDict[author]]
+
+for pair in wordDict:
+    testAuthor = pair[1]
+    if pair[0] in skip:
+        xj = wordDict[pair]
+        postProb = dict.fromkeys(authors,0)
+        for author in list(authors):
+            distn = distnDict[author]
+            postProb[author] = distn[0]
+            for word in xj:
+                logProb = distn[1][word]
+                postProb[author] += xj[word]*logProb
+        postProbAuthors = list(postProb.keys())
+        postProbList = list(postProb.values())
+        maxIndex = np.argmax(postProbList)
+        prediction = postProbAuthors[maxIndex]
+        j = list(authors).index(prediction)
+        print("Prediction:",pair[0],authors[j],"Accepted:",paperDict[pair[0]])
