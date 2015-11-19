@@ -79,7 +79,7 @@ for pair in FedPaperDict:
                 else:
                     countDict[lowerWord] += 1
     wordDict[pair] = countDict
-    print(pair,len(wordDict[pair]))
+    print("WordDict:",pair,len(wordDict[pair]))
         
 # Disputed and Joints
 disputed = []
@@ -91,7 +91,7 @@ for pair in FedPaperDict:
         joint.append(pair)
 print(disputed)
 print(joint)
-merge = disputed + joint
+merge = disputed #+ joint
 skip = [x[0] for x in merge]
 print(skip)
 
@@ -114,7 +114,7 @@ print(len(usedWordsDict))
 # create test word list
 testWords = []
 for key,val in iter(usedWordsDict.items()):
-    if 'HAMILTON ' in val and 'JAY ' in val and 'MADISON ' in val:
+    if 'HAMILTON ' in val and 'JAY ' in val and 'MADISON ' in val and 'H and M ' in val:
         testWords.append(key)
 print(len(testWords))
 
@@ -129,7 +129,7 @@ for pair in wordDict:
         wordDict[pair] = newDict
 
 nR = 0.
-authors = ['HAMILTON ', 'JAY ', 'MADISON ']
+authors = ['HAMILTON ', 'JAY ', 'MADISON ', 'H and M ']
 nGroups = len(authors)
 logPriors = dict.fromkeys(authors,0)
 freqDistnDict = dict.fromkeys(authors)
@@ -189,38 +189,15 @@ print('acc =',sum(np.diag(confusionMatrix))/sum(sum(confusionMatrix)))
 ###################### HOMEWORK 7.6 # 1 #################################
 
 
-
-# Used Words Dict
-usedWordsDict = {}
-for pair in wordDict:
-    D = wordDict[pair]
-    author = pair[1]
-    for word in D.keys():
-        value = usedWordsDict.get(word)
-        if value is None:
-            value = [author]
-        else:
-            if author not in value:
-                value.append(pair[1])
-        usedWordsDict[word] = value
-print("used words",len(usedWordsDict))
-
-# create test word list
-testWords = []
-for key,val in iter(usedWordsDict.items()):
-    if 'HAMILTON ' in val and 'JAY ' in val and 'MADISON ' in val and 'H and M ' in val:
-        testWords.append(key)
-print("test words",len(testWords))
-
-
 # Remove non-test words from wordDict
 for pair in wordDict:
-    D = wordDict[pair]
-    newDict = {}
-    for word in D:
-        if word in testWords:
-            newDict[word] = D[word]
-    wordDict[pair] = newDict
+    if pair[0] in skip:
+        D = wordDict[pair]
+        newDict = {}
+        for word in D:
+            if word in testWords:
+                newDict[word] = D[word]
+        wordDict[pair] = newDict
 
 nR = 0.
 authors = ['HAMILTON ', 'JAY ', 'MADISON ', 'H and M ']
@@ -272,5 +249,7 @@ for pair in wordDict:
         postProbList = list(postProb.values())
         maxIndex = np.argmax(postProbList)
         prediction = postProbAuthors[maxIndex]
+        i = list(authors).index(testAuthor)
         j = list(authors).index(prediction)
         print("Prediction:",pair[0],authors[j],"Accepted:",paperDict[pair[0]])
+
