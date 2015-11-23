@@ -2,7 +2,8 @@ import numpy as np
 import os
 import collections
 
-path = '/Users/keganrabil/Desktop/PBDA/week 11/Data/'
+#path = '/Users/keganrabil/Desktop/PBDA/week 11/Data/'
+path = '/Users/keganrabil/Desktop/PBDA/Data/'
 
 def getColumns(data):
     try:
@@ -12,7 +13,7 @@ def getColumns(data):
     return u
 
 codeBook = {}
-with open(path + 'codeBook.txt',encoding='utf-8') as f:
+with open(path + 'codeBook.txt','rU') as f:
     for line in f:
         data = line.replace('\n','').replace(' ','').split(',')
         key = data[0]
@@ -29,7 +30,7 @@ with open(path + 'codeBook.txt',encoding='utf-8') as f:
 
 
 stateCodes = {}
-with open(path + 'statecounty.csv',encoding='utf-8') as f:
+with open(path + 'statecounty.csv','rU') as f:
     print(f.readline())
     for string in f:
         data = string.split(',')
@@ -43,7 +44,7 @@ def mapper(file,dataDict,counter,year):
     endWt = int(codeBook['Weight'][year][1])
     print(startWt,endWt)
     columnDiabetes = codeBook['Diabetes'][year][0]-1
-    with open(file, encoding="utf-8",errors='ignore') as f:
+    with open(file,'rU') as f:
         for string in f:
             stateCode = int(string[:2])
             #print('stateCode',stateCode)
@@ -87,8 +88,8 @@ for k,v in iter(dataDict.items()):
 print(len(stateDataDict))
 
 for k,v in iter(stateDataDict.items()):
-    print(v[0],v[1])
-    print("Weighted Mean:",k,100 * v[0]/v[1])
+    #print(v[0],v[1])
+    #print("Weighted Mean:",k,100 * v[0]/v[1])
     stateDataDict[k] = 100 * v[0]/v[1]
 
 statePrevalenceDict = dict.fromkeys(stateCodes)
@@ -102,12 +103,30 @@ for stateKey in stateDataDict:
         data.append((year,prevalence))
         statePrevalenceDict[stateCode] = data
 
+
+R_sq_ad_list = []
 with open(path + 'plottingData.csv','w') as f:
     for k,data in iter(statePrevalenceDict.items()):
         X = np.array([[1,year-2007] for year,_ in data])
         Y = np.array([[prevalence] for _,prevalence in data])
         b = np.linalg.solve(X.T.dot(X),X.T.dot(Y))
-        print(stateCodes[k],b[0],b[1])
+        ##### R^2 adjusted calculations
+        y = np.mean(Y)
+        y_dot = np.dot(Y.T,Y)[0][0]
+        n = float(len(Y))
+        s2 = (y_dot - (n * (y **2)))/(n-1.)
+        l = np.dot(Y.T,np.dot(X,b))[0][0]
+        sig2 = (y_dot - l)/(n-2.)
+        R2 = (s2-sig2)/s2
+        R_sq_ad_list.append([stateCodes[k],R2])
+        print(stateCodes[k],R2)
         string = str(stateCodes[k]) + ',' + str(b[0][0]) + ',' + str(b[1][0]) + '\n'
         f.write(string)
+f.close()
+
+# Write R2 values for homework 8 #4
+with open(path+'rSquared.csv','w') as f:
+    f.write("State,R2\n")
+    for l in R_sq_ad_list:
+            f.write(str(l[0])+","+str(l[1])+"\n")
 f.close()
