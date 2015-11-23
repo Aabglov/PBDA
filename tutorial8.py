@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import collections
+import matplotlib.pyplot as plt
 
 #path = '/Users/keganrabil/Desktop/PBDA/week 11/Data/'
 path = '/Users/keganrabil/Desktop/PBDA/Data/'
@@ -119,7 +120,7 @@ with open(path + 'plottingData.csv','w') as f:
         sig2 = (y_dot - l)/(n-2.)
         R2 = (s2-sig2)/s2
         R_sq_ad_list.append([stateCodes[k],R2])
-        print(stateCodes[k],R2)
+        #print(stateCodes[k],R2)
         string = str(stateCodes[k]) + ',' + str(b[0][0]) + ',' + str(b[1][0]) + '\n'
         f.write(string)
 f.close()
@@ -130,3 +131,22 @@ with open(path+'rSquared.csv','w') as f:
     for l in R_sq_ad_list:
             f.write(str(l[0])+","+str(l[1])+"\n")
 f.close()
+
+# Plot prevalence of dc and va for homework 8 #5
+def homework85():
+    dc = 11
+    va = 51
+    dc_dict = {year: prev for (year,prev) in statePrevalenceDict[dc]}
+    va_dict = {year: prev for (year,prev) in statePrevalenceDict[va]}
+    y = range(2000,2015)
+    x_dc = []
+    x_va = []
+    for i in y:
+        x_dc.append(dc_dict[i])
+        x_va.append(va_dict[i])
+    plt.plot(y,x_dc)
+    plt.plot(y,x_va)
+    plt.legend(['DC', 'VA'], loc='upper left')
+    plt.show()
+
+homework85()
